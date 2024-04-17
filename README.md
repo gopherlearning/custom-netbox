@@ -3,6 +3,7 @@
 ## Чистая установка
 ```bash
 git clone https://github.com/gopherlearning/custom-netbox.git && \
+cd custom-netbox && \
 docker build -t lacalizated-netbox -f custom-netbox.dockerfile . && \
 git clone -b release https://github.com/netbox-community/netbox-docker.git && \
 cd netbox-docker && \
@@ -37,7 +38,6 @@ PLUGINS_CONFIG = {
   "netbox_inventory": {},
 }
 EOF
-docker compose pull && \
 docker compose up -d
 
 
