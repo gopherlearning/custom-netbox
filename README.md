@@ -2,8 +2,44 @@
 
 ## Чистая установка
 ```bash
-git clone 
-docker build -t lacalizated-netbox -f custom-netbox.dockerfile .
+git clone https://github.com/gopherlearning/custom-netbox.git && \
+docker build -t lacalizated-netbox -f custom-netbox.dockerfile . && \
+git clone -b release https://github.com/netbox-community/netbox-docker.git && \
+cd netbox-docker && \
+tee docker-compose.override.yml <<EOF
+version: '3.4'
+services:
+  netbox:
+    ports:
+      - 8000:8080
+    image: lacalizated-netbox
+  netbox-worker:
+    image: lacalizated-netbox
+  netbox-housekeeping:
+    image: lacalizated-netbox
+EOF
+sed -ie "s/^ALLOWED_HOSTS/ENABLE_LOCALIZATION = True\nLANGUAGE_CODE = 'ru-ru'\nALLOWED_HOSTS/g" configuration/configuration.py && \
+tee configuration/plugins.py <<EOF
+PLUGINS = [
+    "netbox_dns",
+    "netbox_qrcode",
+    "netbox_floorplan",
+    "netbox_reorder_rack",
+    "netbox_topology_views",
+    "netbox_attachments",
+    "netbox_inventory",
+]
+PLUGINS_CONFIG = {
+  'netbox_topology_views': {
+    'allow_coordinates_saving': True,
+    'always_save_coordinates': True,
+  },
+  "netbox_inventory": {},
+}
+EOF
+docker compose pull && \
+docker compose up -d
+
 
 ```
 
